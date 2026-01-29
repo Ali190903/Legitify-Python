@@ -10,8 +10,8 @@
 
 *   **Security Scanning**: Detects misconfigurations like missing branch protections, insecure webhook settings, and stale secrets.
 *   **OPA Powered**: Uses Open Policy Agent (OPA) and Rego policies for flexible and auditable security rules.
-*   **Comprehensive Coverage**: Scans Repositories, Organizations, and Members.
-*   **Rich Output**: Provides clear, human-readable reports with actionable remediation steps, or machine-parseable JSON.
+*   **Comprehensive Coverage**: Scans Repositories, Organizations, Members, **Actions**, and **Runners**.
+*   **Rich Output**: Provides clear, human-readable reports (Table, Markdown) with actionable remediation steps, or machine-parseable JSON.
 
 ## 🛠️ Installation
 

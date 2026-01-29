@@ -225,3 +225,15 @@ class GitHubClient:
             return data["security_and_analysis"]
         return {}
 
+    # Organization Actions & Runners
+    def get_organization_actions_permissions(self, org: str) -> dict:
+        return self._get_rest(f"/orgs/{org}/actions/permissions") or {}
+
+    def get_organization_workflow_permissions(self, org: str) -> dict:
+        return self._get_rest(f"/orgs/{org}/actions/permissions/workflow") or {}
+
+    def get_organization_runner_groups(self, org: str) -> list:
+        resp = self._get_rest(f"/orgs/{org}/actions/runner-groups")
+        if resp and "runner_groups" in resp:
+            return resp["runner_groups"]
+        return []

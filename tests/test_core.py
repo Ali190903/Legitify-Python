@@ -37,8 +37,13 @@ def test_member_collector():
 
 @patch("subprocess.Popen")
 @patch("shutil.which")
-def test_opa_engine(mock_which, mock_popen):
+@patch("os.walk")
+@patch("builtins.open", new_callable=MagicMock)
+def test_opa_engine(mock_open, mock_walk, mock_which, mock_popen):
     mock_which.return_value = "/usr/bin/opa"
+    
+    # Mock os.walk to return nothing effectively to skip metadata loading or mock a file
+    mock_walk.return_value = []
     
     mock_process = MagicMock()
     mock_process.communicate.return_value = ('{"result": [{"expressions": [{"value": {"rule1": true}}]}]}', '')

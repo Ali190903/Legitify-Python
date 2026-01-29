@@ -86,5 +86,27 @@ class Organization(BaseModel):
     members: List[Member] = []
     organization_secrets: List[OrganizationSecret] = []
     hooks: List[Hook] = []
+    
+    # Actions & Runners
+    actions: Optional['OrganizationActions'] = None
+    runner_groups: List['RunnerGroup'] = []
 
     model_config = ConfigDict(populate_by_name=True)
+
+class OrganizationActions(BaseModel):
+    actions_permissions: Dict[str, Any] = Field(default_factory=dict)
+    token_permissions: Dict[str, Any] = Field(default_factory=dict)
+
+class RunnerGroup(BaseModel):
+    id: int
+    name: str
+    visibility: str
+    allows_public_repositories: bool
+    default: bool
+    runners_url: str
+    inherited: bool
+    selected_repositories_url: Optional[str] = None
+    workflow_restrictions_read_only: bool = False
+    restricted_to_workflows: bool = False
+    selected_workflows: List[str] = []
+
