@@ -1,0 +1,7 @@
+click
+requests
+pydantic
+rich
+pyyaml
+pytest
+pytest-mock

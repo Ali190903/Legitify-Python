@@ -1,0 +1,17 @@
+{
+    "repository": {
+        "name": "weak-repo",
+        "id": "123",
+        "url": "http://github.com/weak",
+        "isPrivate": true,
+        "isArchived": false,
+        "pushedAt": "2023-01-01T00:00:00Z",
+        "defaultBranchRef": null,
+        "collaborators": [],
+        "repo_secrets": [],
+        "hooks": [],
+        "no_branch_protection_permission": false
+    },
+    "hooks": [],
+    "collaborators": []
+}
