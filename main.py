@@ -14,5 +14,10 @@ def cli():
 
 cli.add_command(analyze)
 
+from cli.list_orgs import list_orgs
+from cli.list_repos import list_repos
+cli.add_command(list_orgs)
+cli.add_command(list_repos)
+
 if __name__ == '__main__':
     cli()

@@ -5,3 +5,4 @@ rich
 pyyaml
 pytest
 pytest-mock
+python-gitlab

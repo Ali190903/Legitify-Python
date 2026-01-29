@@ -1,13 +1,18 @@
 from typing import List
 from internal.clients.github_client import GitHubClient
 from internal.common.types import Member
+from internal.collectors.base_collector import Collector
 
-class MemberCollector:
-    def __init__(self, client: GitHubClient):
+class MemberCollector(Collector):
+    def __init__(self, client: GitHubClient, org: str):
         self.client = client
+        self.org = org
 
-    def collect(self, org_name: str) -> List[Member]:
-        raw_members = self.client.get_members(org_name)
+    def get_namespace(self) -> str:
+        return "member"
+
+    def collect(self) -> List[Member]:
+        raw_members = self.client.get_members(self.org)
         members = []
         
         for m in raw_members:
@@ -18,7 +23,6 @@ class MemberCollector:
                 login=m["login"],
                 role=m.get("role", "MEMBER"),
                 is_admin=is_admin,
-                # last_active is not available via standard GraphQL without Enterprise/SAML
                 last_active=-1 
             )
             members.append(member)

@@ -2,42 +2,52 @@ from typing import List
 from internal.clients.github_client import GitHubClient
 from internal.common.types import Repository, Ref, BranchProtectionRule, Hook, RepositorySecret
 from internal.common import types
+from internal.collectors.base_collector import Collector
 
-class RepositoryCollector:
-    def __init__(self, client: GitHubClient):
+class RepositoryCollector(Collector):
+    def __init__(self, client: GitHubClient, org: str):
         self.client = client
+        self.org = org
 
-    def collect_all(self, org: str) -> List[Repository]:
-        raw_repos = self.client.get_repositories(org)
+    def get_namespace(self) -> str:
+        return "repository"
+
+    def collect(self) -> List[Repository]:
+        raw_repos = self.client.get_repositories(self.org)
         collected_repos = []
 
         for raw in raw_repos:
             repo = self._map_repo(raw)
             
             # Fetch extra data via REST
-            # This might be slow for many repos, but needed for parity.
-            owner = org
+            owner = self.org
             repo_name = repo.name
             
-            # Secrets
-            secrets = self.client.get_repository_secrets(owner, repo_name)
-            for s in secrets:
-                repo.repo_secrets.append(types.RepositorySecret(
-                    name=s["name"],
-                    update_date=s.get("updated_at", "") # Pass ISO string
-                ))
-            
-            # Actions Permissions
-            repo.actions_token_permissions = self.client.get_actions_permissions(owner, repo_name)
-            
-            # Rulesets
-            repo.rules_set = self.client.get_rulesets(owner, repo_name)
-            
-            # Vulnerability Alerts
-            repo.vulnerability_alerts_enabled = self.client.check_vulnerability_alerts(owner, repo_name)
-            
-            # Security & Analysis
-            repo.security_and_analysis = self.client.get_security_analysis(owner, repo_name)
+            try:
+                # Secrets
+                secrets = self.client.get_repository_secrets(owner, repo_name)
+                for s in secrets:
+                    repo.repo_secrets.append(types.RepositorySecret(
+                        name=s["name"],
+                        update_date=s.get("updated_at", "")
+                    ))
+                
+                # Actions Permissions
+                repo.actions_token_permissions = self.client.get_actions_permissions(owner, repo_name)
+                
+                # Rulesets
+                repo.rules_set = self.client.get_rulesets(owner, repo_name)
+                
+                # Vulnerability Alerts
+                repo.vulnerability_alerts_enabled = self.client.check_vulnerability_alerts(owner, repo_name)
+                
+                # Security & Analysis
+                repo.security_and_analysis = self.client.get_security_analysis(owner, repo_name)
+                
+            except Exception as e:
+                # Log error but continue
+                # print(f"Error collecting details for {repo_name}: {e}")
+                pass
             
             collected_repos.append(repo)
 
@@ -80,13 +90,8 @@ class RepositoryCollector:
         if raw.get("webhooks"):
             for node in raw["webhooks"]["nodes"]:
                 hooks.append(Hook(
-                    id=int(node.get("id", 0)) if isinstance(node.get("id"), int) else 0, # GraphQL id is typically string (node id), but REST is int. The policy expects... let's check. 
-                    # Actually GraphQL ID is base64 string. Repository Hook ID in REST is int. 
-                    # If GraphQL returns global node ID, we might need the databaseId if available. 
-                    # For now, let's just use what we have or placeholder.
-                    # Wait, policy might check for specific hooks. 
-                    # Let's map URL and name.
-                    name=node.get("url", ""), # Webhooks don't have a name in GraphQL node usually, just url/config.
+                    id=int(node.get("id", 0)) if isinstance(node.get("id"), int) else 0,
+                    name=node.get("url", ""),
                     url=node.get("url", "")
                 ))
 

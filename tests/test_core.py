@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from internal.collectors.organization_collector import OrganizationCollector
-from internal.collectors.member_collector import MemberCollector
+from internal.collectors.github.organization_collector import OrganizationCollector
+from internal.collectors.github.member_collector import MemberCollector
 from internal.opa.opa_engine import OpaEngine
 
 def test_organization_collector():
@@ -13,9 +13,11 @@ def test_organization_collector():
         "samlIdentityProvider": {"ssoUrl": "http://sso"}
     }
     mock_client.get_organization_webhooks.return_value = []
+    mock_client.get_organization_secrets.return_value = []
 
-    collector = OrganizationCollector(mock_client)
-    org = collector.collect("test-org")
+    collector = OrganizationCollector(mock_client, "test-org")
+    orgs = collector.collect()
+    org = orgs[0]
 
     assert org.login == "test-org"
     assert org.two_factor_requirement_enabled is True
@@ -28,8 +30,8 @@ def test_member_collector():
         {"login": "user2", "role": "MEMBER"}
     ]
 
-    collector = MemberCollector(mock_client)
-    members = collector.collect("test-org")
+    collector = MemberCollector(mock_client, "test-org")
+    members = collector.collect()
 
     assert len(members) == 2
     assert members[0].is_admin is True

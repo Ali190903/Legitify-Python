@@ -20,6 +20,23 @@ class GitHubClient:
             raise Exception(f"GraphQL Error: {data['errors']}")
         return data
 
+    def get_user_organizations(self):
+        query = """
+        query {
+            viewer {
+                organizations(first: 100) {
+                    nodes {
+                        login
+                    }
+                }
+            }
+        }
+        """
+        data = self.query(query)
+        if data and "data" in data and "viewer" in data["data"]:
+             return [node["login"] for node in data["data"]["viewer"]["organizations"]["nodes"]]
+        return []
+
     def get_repositories(self, org_name: str):
         query = """
         query($login: String!, $cursor: String) {
@@ -237,3 +254,8 @@ class GitHubClient:
         if resp and "runner_groups" in resp:
             return resp["runner_groups"]
         return []
+
+    def get_organization_secrets(self, org: str) -> list:
+        # returns list of secrets dicts
+        resp = self._get_rest(f"/orgs/{org}/actions/secrets")
+        return resp.get("secrets", []) if resp else []
